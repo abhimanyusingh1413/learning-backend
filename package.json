@@ -1,0 +1,16 @@
+{
+  "name": "utube_backend",
+  "version": "1.0.0",
+  "description": "youtube like backend for learning complixity and data modeling and many industries practies",
+  "keywords": [
+    "javaScript",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Abhimanyu kumar",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
