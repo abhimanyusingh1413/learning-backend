@@ -51,7 +51,7 @@ const userSchema = new Schema({
 }
 );
 
-//password encript->middleware hooks(pre) use krte hai  insted of callback function use function as we use (this) keyword next flag
+//password encript->middleware hooks(pre) use krte hai  insted of callback function use function as we use (this) keyword and next flag
 userSchema.pre("save",async function(next){
     if(!this.isModified("password")) return next();
 
