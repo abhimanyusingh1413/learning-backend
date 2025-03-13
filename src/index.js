@@ -8,6 +8,20 @@ dotenv.config({
 })
 
 connectDB()
+.then(()=>{
+
+    app.on("error",(error)=>{
+        console.log("ERROR App is not listening",error);
+        throw error
+    })
+
+    app.listen(process.env.PORT || 8000,()=>{
+        console.log(`server is running at port:${process.env.PORT}`);
+    })
+})
+.catch((error)=>{
+    console.log("Mongoose db connection failed !!!",error);
+})
 
 
 
