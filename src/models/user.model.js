@@ -1,0 +1,99 @@
+import mongoose, {Schema} from "mongoose";
+import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt"
+
+const userSchema = new Schema({
+    username:{
+        type:String,
+        required:true,
+        unique:true,
+        lowercase:true,
+        trim:true,
+        index:true
+    },
+    email:{
+        type:String,
+        required:true,
+        unique:true,
+        lowercase:true,
+        trim:true,
+    },
+    fullname:{
+        type:String,
+        required:true,
+        trim:true,
+        index:true
+    },
+    avatar:{
+        type:String, //cloudinary url
+        required:true,
+    },
+    coverImage:{
+        type:String, //cloudinary url 
+    },
+    watchHistory:[
+        {
+            type:Schema.Types.ObjectId,
+            ref:"Vedio"
+        }
+    ],
+    password:{
+        type:String,  //but not at this time but use in encripted form
+        required:[true,'password is required'] //custome msg
+
+    },
+    refreshToken:{
+        type:String,
+    } 
+},
+{
+    timestamps:true
+}
+);
+
+//password encript->middleware hooks(pre) use krte hai  insted of callback function use function as we use (this) keyword next flag
+userSchema.pre("save",async function(next){
+    if(!this.isModified("password")) return next();
+
+    this.password = bcrypt.hash(this.password,10)
+    next()
+})
+
+//custom method banya h yaha as check passward sahi h ki nahi user pass jayeg ana ki hash pswd ye v bcrpt krega
+userSchema.methods.isPasswordCorrect = async function (passward) {
+    return await bcrypt.compare(passward,this.passward)
+}
+
+//JWT TOKEN GENRATE 
+userSchema.methods.generateAccessToken = function(){
+   return jwt.sign(
+        //payloads
+        {
+            _id:this._id,
+            email:this.email,
+            username:this.username,
+            fullname:this.fullname
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+
+userSchema.methods.generateRefreshToken = function(){
+    return jwt.sign(
+        //payloads
+        {
+            _id:this._id
+            
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn:process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
+
+
+export const User = mongoose.model("User",userSchema);
