@@ -18,3 +18,4 @@ const storage = multer.diskStorage({
   export  const upload = multer({ 
     storage,
  })
+ //middleware ko import krege routes me
