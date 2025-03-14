@@ -1,5 +1,7 @@
 // for promises after db connect  -->called rapper fun use hoga baar baar jab v db connection krege to ek vairable form me bana liye ha isko utile folder me
 
+
+// rapper or helper function for the controller thats it
 const asyncHandler = (requestHandler) => {
     return (req, res, next) => {
         Promise.resolve(requestHandler(req, res, next))
