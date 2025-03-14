@@ -16,9 +16,12 @@ import fs from "fs" // nodejs me present rahata hai fileSysm (unlink for dele)me
             const responce = await cloudinary.uploader.upload(localFilePath,{
                 resource_type:"auto"
             })
-            //file has been uploaded successfull
-            console.log("File has been uploaded on cloudinary",responce.url);
-            return responce 
+            //file has been uploaded successfull -->testing ke console use kiya the ab unlink kr dege 
+            // console.log("File has been uploaded on cloudinary",responce.url);
+            // return responce 
+            fs.unlinkSync(localFilePath)
+            return responce;
+
         } catch (error) {
             fs.unlinkSync(localFilePath) // remove the locally saved temporary file as the upload operation got failed.
             return null;

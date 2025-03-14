@@ -41,17 +41,24 @@ const registerUser = asyncHandler(async (req,res)=>{
     }
 
     // or opereator v usse kreg ->yaha user ke through hmlog db match find krege
-   const existedUsers =  User.findOne({
+   const existedUsers = await User.findOne({
         $or:[{username},{email}]
     })
 
     if(existedUsers){
         throw new ApiError(409,"User with email or Username already exits")
     }
+    //for testing i.e debuging console user kr rahe h
+    // console.log(req.files);
 
     //as we use middleware multer provide .files 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath= req.files?.coverImage[0]?.path;
+    // const coverImageLocalPath= req.files?.coverImage[0]?.path;
+    // for his claasical if is used postman give error
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage)&& req.files.coverImage.length > 0){
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file is required");
