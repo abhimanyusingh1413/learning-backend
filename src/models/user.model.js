@@ -59,12 +59,13 @@ userSchema.pre("save",async function(next){
     next()
 })
 
-//custom method banya h yaha as check passward sahi h ki nahi user pass jayeg ana ki hash pswd ye v bcrpt krega
-userSchema.methods.isPasswordCorrect = async function (passward) {
-    return await bcrypt.compare(passward,this.passward)
+//custom method banya h yaha se passward check kr skte h sahi h ki nahi user pass jayeg ana ki hash pswd ye v bcrpt krega
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password,this.password)
 }
 
 //JWT TOKEN GENRATE 
+// accesstoken are short lived
 userSchema.methods.generateAccessToken = function(){
    return jwt.sign(
         //payloads
@@ -81,6 +82,8 @@ userSchema.methods.generateAccessToken = function(){
     )
 }
 
+
+// refreshtoken are longlived store in data base and user for file without login and generates access token for req if both server and req as same refreshtoken
 userSchema.methods.generateRefreshToken = function(){
     return jwt.sign(
         //payloads
