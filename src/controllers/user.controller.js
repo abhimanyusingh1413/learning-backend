@@ -276,7 +276,7 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 const getCurrentUser = asyncHandler(async(req,res)=>{
     return res
     .status(200)
-    .json(200,req.user,"current user fetched successfully")
+    .json(new ApiResponce(200,req.user,"current user fetched successfully"))
 })
 
 
@@ -314,6 +314,8 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file is missing")
     }
+
+    //TODO:dele old image -avatar
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
 
@@ -366,6 +368,79 @@ const updateUserCoverImage = asyncHandler(async(req,res)=>{
         new ApiResponce(200,user,"Cover image updated successfully")
     )
 })
+
+const getUserChannelProfile = asyncHandler(async(req,res)=>{
+    const {username} = req.params  // param is used for url se username lege uska 
+
+    if(!username?.trim()){
+        throw new ApiResponce(400,"username is missing")
+    }
+
+    // in aggreagete pipline stages are there at every stage some filteration is done and for next stage it is input
+    // value in aggregate pipe value array ke form me at h 
+   const channel = await User.aggregate([
+    { //first pipline(stage1) -->find kr user scema me pauch gaye 
+        $match:{  // field--> match
+            username:username?.toLowerCase() //output hmlog me match ek filed h ek hi ayega iske acc hi ata h
+        }
+    },
+    { // second pileline(stage2)-->channel ke kitne subscriber hai wo dekehge ab
+        $lookup:{
+            from:"Subscription",
+            localField:"_id",
+            foreignField:"channel",
+            as:"subscribers"
+        }
+    },
+    {//third piple (stage3)-->channel kitna ko subscribe kiya h
+        $lookup:{
+            from:"Subscription",
+            localField:"_id",
+            foreignField:"subscriber",
+            as:"subscribedTo"
+        }
+    },
+    {
+        $addFields:{ //addfiled 
+            subscriberCount:{
+                $size:"$subscribers" //count kr rahe no. of subscribers.
+            },
+            channelsSubscribedToCount:{
+                $size:"$subscribedTo"  //count same
+            },
+            isSubscribed:{
+                $cond:{
+                    if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                    then:true,
+                    else:false
+                }
+            }
+        }
+    },
+    {
+        $project:{ // wahi beje ge jo need go nahi to network traffice badgea faltu me
+            fullName:1,//flag h ye 1
+            username:1,
+            subscriberCount:1,
+            channelsSubscribedToCount:1,
+            isSubscribed:1,
+            avatar:1,
+            coverImage:1,
+            email:1
+
+            // man kre to channel createdd ke createdAt bej skte ho
+        }
+    }
+   ])
+
+   if(!channel?.length){
+     throw new ApiError(404,"channel does not exists")
+   }
+
+   return res
+   .status(200)
+   .json(new ApiResponce(200,channel[0],"User channel fetched successfully"))
+})
 export {registerUser,
     LoginUser,
     logoutUser,
@@ -373,5 +448,6 @@ export {registerUser,
     getCurrentUser,
     changeCurrentPassword,
     updateUserAvatar,
-    updateUserCoverImage 
+    updateUserCoverImage,
+    getUserChannelProfile
 }
