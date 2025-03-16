@@ -369,6 +369,7 @@ const updateUserCoverImage = asyncHandler(async(req,res)=>{
     )
 })
 
+//aggrerate pipline from subscribition schema to find subscriber and cahnnel subscribed
 const getUserChannelProfile = asyncHandler(async(req,res)=>{
     const {username} = req.params  // param is used for url se username lege uska 
 
@@ -441,6 +442,66 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{
    .status(200)
    .json(new ApiResponce(200,channel[0],"User channel fetched successfully"))
 })
+
+// here nested pipeline ->as for watchhistory(user)-->video(find id) through lookup and then waha se (owner)(jo user hi h)to  find krna hoga jo user hi h
+const getWatchHistory = asyncHandler(async(req,res)=>{
+ //interview q->req.user._id yaha objectId('qwerty') string milah h sirf objectId nahi mongoose pr kr khud isko to iske liye 
+ // hm id ko convert kr let hai
+ const user = await User.aggregate([
+    {
+        $match:{ // req.user._id  direct nahi use hoga converted kiye h ayha (mogoose ke object id bnana h)
+            _id:new mongoose.Types.ObjectId(req.user._id)
+        }
+    },
+    {
+        $lookup:{
+            from:"Video",
+            localField:"watchHistory",
+            foreignField:"_id",
+            as:"watchHistory",
+            //subpipline use or populate method v hot h pr av subpipline
+            pipeline:[
+               {
+                $lookup:{
+                    from:"users",
+                    localField:"owner",
+                    foreignField:"_id",
+                    as:"owner",
+                    pipeline:[
+                        {
+                            $project:{
+                                fullName:1,
+                                username:1,
+                                avatar:1
+                            }
+                        }
+                    ]
+                }
+               },
+               {
+                // for fronted help not array hoga direct jo chaiye wo milega usko-->sidh usko object mil jayeah owner. krke values nikal lega 
+                $addFields:{
+                    owner:{
+                        $first:"$owner"
+                    }
+                }
+               }
+            ]
+        }
+    }
+ ])
+
+ return res.
+ status(200)
+ .json(
+    new ApiResponce(
+        200,
+        user[0].watchHistory,
+        "watch history fetched successfully"
+    )
+ )
+})
+
 export {registerUser,
     LoginUser,
     logoutUser,
@@ -449,5 +510,6 @@ export {registerUser,
     changeCurrentPassword,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 }
