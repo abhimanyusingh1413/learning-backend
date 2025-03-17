@@ -12,7 +12,7 @@ import {
     getUserChannelProfile,
     getWatchHistory
  } from "../controllers/user.controller.js";
- 
+
 import {upload} from "../middlewares/multer.middlewares.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
@@ -44,7 +44,7 @@ router.route("/update-account").patch(verifyJWT,updateAccountDetails)
 
 // multiple middleware hoga single file 
 router.route("/avatar").patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
-router.route("/cover-image").patch(verifyJWT,upload.single("/coverImage"),updateUserCoverImage)
+router.route("/cover-image").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
 
 
 //param se lege to /c/:username ye username se hi le rahe the 

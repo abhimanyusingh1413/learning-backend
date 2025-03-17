@@ -182,8 +182,8 @@ const logoutUser = asyncHandler(async(req,res)=>{
     //refresh token clear from db
    await User.findByIdAndUpdate(
          req.user._id,{ //verifyjwt  me user availbel tha yah se isko liya
-            $set:{  // mongodb me refresh token del ya indefind kr diya
-                refreshToken:undefined
+            $unset:{  // mongodb me refresh token del ya indefind kr diya
+                refreshToken:1//this removes the field from document
             }   
         },
         {
